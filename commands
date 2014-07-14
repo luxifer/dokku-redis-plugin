@@ -42,7 +42,7 @@ case "$1" in
         docker stop $ID > /dev/null
     fi
     # Fork Redis image
-    ID=$(docker run -d luxifer/redis exit 0)
+    ID=$(docker run -d luxifer/redis /bin/bash "exit 0")
     docker wait $ID > /dev/null
     IMAGE=$(docker commit $ID)
     docker tag $IMAGE $REDIS_IMAGE
