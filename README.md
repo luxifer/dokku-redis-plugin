@@ -16,11 +16,11 @@ Commands
 --------
 ```
 $ dokku help
-     redis:create <app>     Create a Redis container
-     redis:delete <app>     Delete specified Redis container
-     redis:info <app>       Display container informations
+     redis:create <rd>      Create a Redis container
+     redis:delete <rd>      Delete specified Redis container
+     redis:info <rd>        Display container information
      redis:link <app> <rd>  Link an app to a Redis container
-     redis:logs <app>       Display last logs from Redis contain
+     redis:logs <rd>        Display last logs from Redis container
 ```
 
 Simple usage
