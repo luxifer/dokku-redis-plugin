@@ -87,3 +87,11 @@ Redis information:
 ```
 dokku redis:info foo
 ```
+
+Environment Variables
+---------------------
+```
+REDIS_URL
+REDIS_PORT
+REDIS_IP
+```

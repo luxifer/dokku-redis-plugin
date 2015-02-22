@@ -102,12 +102,14 @@ case "$1" in
             IP=$(docker inspect $ID | grep IPAddress | awk '{ print $2 }' | tr -d ',"')
             # Write REDIS_IP to app's ENV file
             REDIS_URL="REDIS_URL=redis://$IP:6379"
+            REDIS_IP="REDIS_IP=$IP"
+            REDIS_PORT="REDIS_PORT=6379"
             ENV_FILE="$DOKKU_ROOT/$APP/ENV"
             if [[ ! -f $ENV_FILE ]]; then
                 touch $ENV_FILE
             fi
-            ENV_TEMP=$(cat "${ENV_FILE}" | sed "/^export REDIS_URL=/ d")
-            ENV_TEMP="${ENV_TEMP}\nexport ${REDIS_URL}"
+            ENV_TEMP=$(cat "${ENV_FILE}" | sed "/^export \(REDIS_URL\|REDIS_IP\|REDIS_PORT\)=/ d")
+            ENV_TEMP="${ENV_TEMP}\nexport ${REDIS_URL}\nexport ${REDIS_IP}\nexport ${REDIS_PORT}"
             echo -e "$ENV_TEMP" | sed '/^$/d' | sort > $ENV_FILE
             echo
             echo "-----> $APP linked to $REDIS_IMAGE container"
