@@ -2,46 +2,42 @@
 set -e;
 
 APP="$1"
-REDIS_APP_IMAGE="redis/$APP"
-REDIS_APP_IMAGE_ID=$(docker images | grep "$REDIS_IMAGE" | awk '{print $3}')
+HOST_DIR="$DOKKU_ROOT/.redis/volume-$APP"
 
-# verifies that an app mimage has been mae
-if [[ -n $REDIS_APP_IMAGE_ID ]]; then
-  echo "-----> Checking status of Redis"
+# check if redis is enabled for the app
+if [[ -d $HOST_DIR ]]; then
+  REDIS_APP_IMAGE="redis/$APP"
+  REDIS_APP_IMAGE_ID=$(docker images | grep "$REDIS_IMAGE" | awk '{print $3}')
 
-  REDIS_IMAGE=$(docker images | grep "luxifer/redis " | awk '{print $3}')
-  if [[ -z $REDIS_IMAGE ]]; then
-    echo "Redis image not found...Did you run 'dokku plugins-install' ?"
-    exit 1
-  fi
+  # verifies that an app mimage has been mae
+  if [[ -n $REDIS_APP_IMAGE_ID ]]; then
+    echo "-----> Checking status of Redis"
 
-  echo "	Found image redis/$APP"
-  echo -n "	Checking status..."
-
-  # since this is in pre-deploy, i don't think we'll run into a situation where the container is already started
-  # but the postgres guys had it.
-  # "never say never"
-  REDIS_APP_IMAGE_CONTAINER_ID=$(docker ps | grep "$REDIS_APP_IMAGE" | awk '{print $1}')
-  if [[ -n $REDIS_APP_IMAGE_CONTAINER_ID ]]; then
-    echo "ok."
-  else
-    echo "stopped."
-    # this is pretty much ripped from redis:create
-    HOST_DIR="$DOKKU_ROOT/.redis/volume-$APP"
-    if [[ -d $HOST_DIR ]]; then
-      echo
-      echo "-----> Reusing redis/$APP database"
-    else
-      mkdir -p $HOST_DIR
+    REDIS_IMAGE=$(docker images | grep "luxifer/redis " | awk '{print $3}')
+    if [[ -z $REDIS_IMAGE ]]; then
+      echo "Redis image not found...Did you run 'dokku plugins-install' ?"
+      exit 1
     fi
-    VOLUME="$HOST_DIR:/var/lib/redis"
-    echo -n "	Launching $REDIS_APP_IMAGE..."
-    echo "COMMAND: docker run -v $VOLUME -p 6379 -d $REDIS_APP_IMAGE /bin/start_redis.sh"
-    ID=$(docker run -v $VOLUME -p 6379 -d $REDIS_APP_IMAGE /bin/start_redis.sh)
-    sleep 4
-    dokku redis:link $APP $APP
-    sleep 1
-    echo "ok."
+
+    echo "	Found image redis/$APP"
+    echo -n "	Checking status..."
+
+    # since this is in pre-deploy, i don't think we'll run into a situation where the container is already started
+    # but the postgres guys had it.
+    # "never say never"
+    REDIS_APP_IMAGE_CONTAINER_ID=$(docker ps | grep "$REDIS_APP_IMAGE" | awk '{print $1}')
+    if [[ -n $REDIS_APP_IMAGE_CONTAINER_ID ]]; then
+      echo "ok."
+    else
+      echo "stopped."
+      VOLUME="$HOST_DIR:/var/lib/redis"
+      echo -n "	Launching $REDIS_APP_IMAGE..."
+      echo "COMMAND: docker run -v $VOLUME -p 6379 -d $REDIS_APP_IMAGE /bin/start_redis.sh"
+      ID=$(docker run -v $VOLUME -p 6379 -d $REDIS_APP_IMAGE /bin/start_redis.sh)
+      sleep 4
+      dokku redis:link $APP $APP
+      sleep 1
+      echo "ok."
+    fi
   fi
 fi
-
