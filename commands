@@ -102,9 +102,7 @@ case "$1" in
             IP=$(docker inspect $ID | grep IPAddress | awk '{ print $2 }' | tr -d ',"')
             # it seems like the dokku way of doing things is using dokku config:set to set environment variables, 
             # eg, not setting them via modifying the app's ENV file
-            dokku config:set $APP "REDIS_URL=redis://$IP:6379"
-            dokku config:set $APP "REDIS_IP=$IP"
-            dokku config:set $APP "REDIS_PORT=6379"
+            dokku config:set $APP "REDIS_URL=redis://$IP:6379" "REDIS_IP=$IP" "REDIS_PORT=6379"
             echo
             echo "-----> $APP linked to $REDIS_IMAGE container"
         fi
